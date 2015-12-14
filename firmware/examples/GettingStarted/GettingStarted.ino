@@ -27,7 +27,7 @@
         do NOT connect more than 3.3V to pin 2(3V3)!!!
  */
 
-#include particle-rf24/"particle-rf24.h"
+#include "particle-rf24/particle-rf24.h"
 
 /****************** User Config ***************************/
 /***      Set this radio as radio number 0 or 1         ***/
