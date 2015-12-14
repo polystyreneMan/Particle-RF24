@@ -12,10 +12,12 @@
   Written by Limor Fried/Ladyada for Adafruit Industries.
   MIT license, all text above must be included in any redistribution
  ****************************************************/
+ #include "SoftSPI.h"
+ #include "application.h"
 
 SoftSPI::SoftSPI( int8_t mosi, int8_t sclk, int8_t miso )
 {
-  _mosi  = mosi;
+  _mosi = mosi;
   _miso = miso;
   _sclk = sclk;
 }
@@ -55,19 +57,6 @@ void SoftSPI::begin()
     digitalWrite(_mosi, LOW);
 }
 
-inline __attribute__((always_inline)) uint8_t spitransfer(uint8_t data) {
-	uint8_t b=0;
-
-	for (uint8_t bit = 0; bit < 8; bit++)  {	// walks down mask from bit 7 to bit 0
-		(data & (1 << (7-bit))) ? pinSetFast(_mosi) : pinResetFast(_mosi);	// write the outgoing bit
-		pinSetFast(_sclk);
-		b <<= 1;
-		if (pinReadFast(_miso)) b |= 1;	// Read the incoming bit
-		pinResetFast(_sclk);
-	}
-	return b;
-}
-
 // based on
 /*
 * HARDWARE AND SOFTWARE LIQUIDCRYSTAL SPI
@@ -79,7 +68,7 @@ inline __attribute__((always_inline)) uint8_t spitransfer(uint8_t data) {
 * =======================================================
 * https://github.com/technobly/SparkCore-LiquidCrystalSPI
 */
-inline void Adafruit_HX8357::writeFast(uint8_t value)
+inline void SoftSPI::writeFast(uint8_t value)
 {
   for (int8_t i = 7; i >= 0; i--)
   {

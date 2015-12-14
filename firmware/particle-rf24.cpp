@@ -33,11 +33,11 @@ void RF24::csn(bool mode)
   // If we assume 2Mbs data rate and 16Mhz clock, a
   // divider of 4 is the minimum we want.
   // CLK:BUS 8Mhz:2Mhz, 16Mhz:4Mhz, or 20Mhz:5Mhz
-  SPI.setBitOrder(MSBFIRST);
-  SPI.setDataMode(SPI_MODE0);
+  //SPI.setBitOrder(MSBFIRST);
+  //SPI.setDataMode(SPI_MODE0);
 
   // Was 4Mhz on Arduino
-  SPI.setClockDivider(SPI_CLOCK_DIV16); // 4.5Mhz (if using <= 2mbps data rate)
+  //SPI.setClockDivider(SPI_CLOCK_DIV16); // 4.5Mhz (if using <= 2mbps data rate)
   //SPI.setClockDivider(SPI_CLOCK_DIV32); // 2.25Mhz (if using <= 1mbps data rate)
 
   digitalWrite(csn_pin,mode);
@@ -70,9 +70,9 @@ uint8_t RF24::read_register(uint8_t reg, uint8_t* buf, uint8_t len)
   uint8_t status;
 
   beginTransaction();
-  status = SPI.transfer( R_REGISTER | ( REGISTER_MASK & reg ) );
+  status = _softSpi.spitransfer( R_REGISTER | ( REGISTER_MASK & reg ) );
   while ( len-- ){
-    *buf++ = SPI.transfer(0xff);
+    *buf++ = _softSpi.spitransfer(0xff);
   }
   endTransaction();
 
@@ -86,8 +86,8 @@ uint8_t RF24::read_register(uint8_t reg)
   uint8_t result;
 
   beginTransaction();
-  SPI.transfer( R_REGISTER | ( REGISTER_MASK & reg ) );
-  result = SPI.transfer(0xff);
+  _softSpi.spitransfer( R_REGISTER | ( REGISTER_MASK & reg ) );
+  result = _softSpi.spitransfer(0xff);
   endTransaction();
 
   return result;
@@ -100,9 +100,9 @@ uint8_t RF24::write_register(uint8_t reg, const uint8_t* buf, uint8_t len)
   uint8_t status;
 
   beginTransaction();
-  status = SPI.transfer( W_REGISTER | ( REGISTER_MASK & reg ) );
+  status = _softSpi.spitransfer( W_REGISTER | ( REGISTER_MASK & reg ) );
   while ( len-- )
-    SPI.transfer(*buf++);
+    _softSpi.spitransfer(*buf++);
   endTransaction();
 
   return status;
@@ -129,8 +129,8 @@ uint8_t RF24::write_register(uint8_t reg, uint8_t value)
   #else
 
   beginTransaction();
-  status = SPI.transfer( W_REGISTER | ( REGISTER_MASK & reg ) );
-  SPI.transfer(value);
+  status = _softSpi.spitransfer( W_REGISTER | ( REGISTER_MASK & reg ) );
+  _softSpi.spitransfer(value);
   endTransaction();
 
   #endif
@@ -151,12 +151,12 @@ uint8_t RF24::write_payload(const void* buf, uint8_t data_len, const uint8_t wri
   IF_SERIAL_DEBUG(SERIAL("[Writing %u bytes %u blanks]",data_len,blank_len) );
 
   beginTransaction();
-  status = SPI.transfer( writeType );
+  status = _softSpi.spitransfer( writeType );
   while ( data_len-- ) {
-    SPI.transfer(*current++);
+    _softSpi.spitransfer(*current++);
   }
   while ( blank_len-- ) {
-    SPI.transfer(0);
+    _softSpi.spitransfer(0);
   }
   endTransaction();
 
@@ -176,12 +176,12 @@ uint8_t RF24::read_payload(void* buf, uint8_t data_len)
   IF_SERIAL_DEBUG(SERIAL("[Reading %u bytes %u blanks]",data_len,blank_len); );
 
   beginTransaction();
-  status = SPI.transfer( R_RX_PAYLOAD );
+  status = _softSpi.spitransfer( R_RX_PAYLOAD );
   while ( data_len-- ) {
-    *current++ = SPI.transfer(0xFF);
+    *current++ = _softSpi.spitransfer(0xFF);
   }
   while ( blank_len-- ) {
-    SPI.transfer(0xff);
+    _softSpi.spitransfer(0xff);
   }
   endTransaction();
 
@@ -209,7 +209,7 @@ uint8_t RF24::spiTrans(uint8_t cmd){
   uint8_t status;
 
   beginTransaction();
-  status = SPI.transfer( cmd );
+  status = _softSpi.spitransfer( cmd );
   endTransaction();
 
   return status;
@@ -277,9 +277,10 @@ void RF24::print_address_register(const char* name, uint8_t reg, uint8_t qty)
 }
 /****************************************************************************/
 
-RF24::RF24(uint8_t _cepin, uint8_t _cspin):
+RF24::RF24(uint8_t _cepin, uint8_t _cspin, int8_t _sclkpin, int8_t _mosipin, int8_t _misopin):
   ce_pin(_cepin), csn_pin(_cspin), wide_band(true), p_variant(false),
-  payload_size(32), dynamic_payloads_enabled(false), addr_width(5)//,pipe0_reading_address(0)
+  payload_size(32), dynamic_payloads_enabled(false), addr_width(5),
+  _softSpi( _mosipin, _sclkpin, _misopin )
 {
   pipe0_reading_address[0]=0;
 }
@@ -378,7 +379,7 @@ bool RF24::begin(void)
   if (ce_pin != csn_pin) pinMode(ce_pin,OUTPUT);
   pinMode(csn_pin,OUTPUT);
 
-  SPI.begin();
+  _softSpi.begin();
   ce(LOW);
   csn(HIGH);
 
@@ -781,8 +782,8 @@ uint8_t RF24::getDynamicPayloadSize(void)
   uint8_t result = 0;
 
   beginTransaction();
-  SPI.transfer( R_RX_PL_WID );
-  result = SPI.transfer(0xff);
+  _softSpi.spitransfer( R_RX_PL_WID );
+  result = _softSpi.spitransfer(0xff);
   endTransaction();
 
   if(result > 32) { flush_rx(); delay(2); return 0; }
@@ -960,8 +961,8 @@ void RF24::toggle_features(void)
 {
 
   beginTransaction();
-	SPI.transfer( ACTIVATE );
-  SPI.transfer( 0x73 );
+	_softSpi.spitransfer( ACTIVATE );
+  _softSpi.spitransfer( 0x73 );
 	endTransaction();
 
 }
@@ -1031,10 +1032,10 @@ void RF24::writeAckPayload(uint8_t pipe, const void* buf, uint8_t len)
   uint8_t data_len = rf24_min(len,32);
 
   beginTransaction();
-  SPI.transfer(W_ACK_PAYLOAD | ( pipe & 0b111 ) );
+  _softSpi.spitransfer(W_ACK_PAYLOAD | ( pipe & 0b111 ) );
 
   while ( data_len-- )
-    SPI.transfer(*current++);
+    _softSpi.spitransfer(*current++);
   endTransaction();
 
 }

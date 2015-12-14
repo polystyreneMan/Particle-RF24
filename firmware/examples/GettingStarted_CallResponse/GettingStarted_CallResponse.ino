@@ -42,10 +42,10 @@
 bool radioNumber = 0;
 
 /* Hardware configuration: Set up nRF24L01 radio on SPI bus plus pins D6 & A2 */
-RF24 radio(D6,A2);
+RF24 radio( D0, D1, D2, D3, D4 );
 /**********************************************************/
                                                                            // Topology
-byte addresses[][6] = {"1Node","2Node"};              // Radio pipe addresses for the 2 nodes to communicate.
+byte addresses[][5] = { 0xE7E7E7E7E7, 0xE7E7E7E7E7 };                      // Radio pipe addresses for the 2 nodes to communicate.
 
 // Role management: Set up role.  This sketch uses the same software for all the nodes
 // in this system.  Doing so greatly simplifies testing.

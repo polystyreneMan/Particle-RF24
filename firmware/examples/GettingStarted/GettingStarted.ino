@@ -27,17 +27,17 @@
         do NOT connect more than 3.3V to pin 2(3V3)!!!
  */
 
-#include "particle-rf24/particle-rf24.h"
+#include particle-rf24/"particle-rf24.h"
 
 /****************** User Config ***************************/
 /***      Set this radio as radio number 0 or 1         ***/
 bool radioNumber = 0;
 
 /* Hardware configuration: Set up nRF24L01 radio on SPI bus plus pins D6 & A2 */
-RF24 radio( D0, D1 );
+RF24 radio( D0, D1, D2, D3, D4 );
 /**********************************************************/
 
-byte addresses[][5] = { 0xE7E7E7E7E7, 0xE7E7E7E7E7 }; 
+byte addresses[][5] = { 0xE7E7E7E7E7, 0xE7E7E7E7E7 };
 
 // Used to control whether this node is sending or receiving
 bool role = 0;

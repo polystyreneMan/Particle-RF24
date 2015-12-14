@@ -15,6 +15,8 @@
 #ifndef __RF24_H__
 #define __RF24_H__
 
+#include "SoftSPI.h"
+
 /**
  * Power Amplifier level.
  *
@@ -53,6 +55,7 @@ private:
   uint8_t addr_width; /**< The address width to use - 3,4 or 5 bytes. */
   uint32_t txRxDelay; /**< Var for adjusting delays depending on datarate */
 
+  SoftSPI _softSpi;
 
 protected:
   /**
@@ -83,7 +86,7 @@ public:
    * @param _cepin The pin attached to Chip Enable on the RF module
    * @param _cspin The pin attached to Chip Select
    */
-  RF24(uint8_t _cepin, uint8_t _cspin);
+  RF24(uint8_t _cepin, uint8_t _cspin, int8_t _sclkpin, int8_t _mosipin, int8_t _misopin);
 
   /**
    * Begin operation of the chip
@@ -1818,4 +1821,3 @@ private:
  */
 
 #endif // __RF24_H__
-
