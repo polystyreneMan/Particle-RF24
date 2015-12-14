@@ -412,10 +412,12 @@ bool RF24::begin(void)
   {
     p_variant = true ;
   }*/
-
-  // Then set the data rate to the slowest (and most reliable) speed supported by all
-  // hardware.
-  setDataRate( RF24_1MBPS ) ;
+  else
+  {
+    // Then set the data rate to the slowest (and most reliable) speed supported by all
+    // hardware.
+    setDataRate( RF24_1MBPS );
+  }
 
   // Initialize CRC and request 2-byte (16bit) CRC
   //setCRCLength( RF24_CRC_16 ) ;
@@ -432,7 +434,7 @@ bool RF24::begin(void)
   // Set up default configuration.  Callers can always change it later.
   // This channel should be universally safe and not bleed over into adjacent
   // spectrum.
-  setChannel(76);
+  setChannel(2);
 
   // Flush buffers
   flush_rx();
