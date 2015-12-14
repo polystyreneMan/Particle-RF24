@@ -34,10 +34,10 @@
 bool radioNumber = 0;
 
 /* Hardware configuration: Set up nRF24L01 radio on SPI bus plus pins D6 & A2 */
-RF24 radio(D6,A2);
+RF24 radio( D0, D1 );
 /**********************************************************/
 
-byte addresses[][6] = {"1Node","2Node"};
+byte addresses[][5] = { 0xE7E7E7E7E7, 0xE7E7E7E7E7 }; 
 
 // Used to control whether this node is sending or receiving
 bool role = 0;
