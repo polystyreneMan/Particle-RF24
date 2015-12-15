@@ -23,7 +23,6 @@ void SERIAL(const char *fmt, ... ){
   vsnprintf(tmp, 128, fmt, args);
   va_end(args);
   Serial.print(tmp); // must include "\n\r" in formatting for newlines
-  Particle.publish( "serial", String( tmp ) );
 }
 
 /****************************************************************************/
